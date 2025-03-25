@@ -1,0 +1,141 @@
+# Hirai and Tarui Crowd Simulation Model
+
+This repository implements the pedestrian dynamics model proposed by **Hirai and Tarui** (1975) for simulating the behavior of crowds under panic conditions. The model incorporates psychological and environmental factors, including wall repulsion, attraction to exits, and social interaction.
+
+---
+
+## Mathematical Model
+
+The motion of each individual \( i \) is governed by the following second-order differential equation:
+
+\[
+  m_i \ddot{x}_i + \nu_i \dot{x}_i = F_{11} + F_{21} + F_{31}
+\]
+
+Where:
+- \( x_i \) is the position vector
+- \( \dot{x}_i \) is the velocity
+- \( m_i \) is the mass
+- \( \nu_i \) is the viscosity (damping) coefficient
+- \( F_{11} \): social forces
+- \( F_{21} \): environmental forces
+- \( F_{31} \): random force due to disturbances
+
+---
+
+## Components of the Forces
+
+### 1. **Social Force** \( F_{11} = F_{ai} + F_{bi} + F_{ci} \)
+
+#### (a) Forward Driving Force:
+\[
+F_{ai} = a \cdot \hat{x}_i
+\]
+Pushes the individual forward in the direction of motion.
+
+#### (b) Attraction / Repulsion:
+\[
+F_{bi} = - \sum_j c(x_i, \dot{x}_i, x_j) \frac{x_j - x_i}{r_{ij}}
+\]
+Attracts agents at a moderate distance, repels those that are too close.
+
+\(
+  c(x_i, \dot{x}_i, x_j) = c_1(r_{ij}) c_2(\theta_{ij})
+\)
+
+#### (c) Velocity Matching (Alignment):
+\[
+F_{ci} = - \frac{1}{M} \sum_j h(x_i, \dot{x}_i, x_j) \frac{x_j - x_i}{r_{ij}}
+\]
+Encourages alignment of motion in local groups.
+
+\(
+  h(x_i, \dot{x}_i, x_j) = h_1(r_{ij}) h_2(\theta_{ij})
+\)
+
+---
+
+### 2. **Environmental Force** \( F_{21} \)
+
+\[
+F_{21} = F_{wi} + \sum_k (F_{eik} + F_{fik}) + F_{gi} + F_{hi}
+\]
+
+- **Wall Repulsion** \( F_{wi} \):
+
+Repels agents from walls:
+
+\[
+F_{wi} =
+\begin{cases}
+  w_1 e_w & \text{if } d_i < d \text{ and } v_{wi} > 0 \\
+  w_0 e_w & \text{if } d_i < d \text{ and } v_{wi} \leq 0 \\
+  0 & \text{otherwise}
+\end{cases}
+\]
+
+Where \( e_w \) is the unit vector away from the wall.
+
+- **Attraction to Signs** \( F_{eik} \):
+\[
+F_{eik} = \eta \cdot \frac{P_k - x_i}{\|P_k - x_i\|}
+\]
+Attracts the agent toward visible guiding signs \( P_k \).
+
+- **Memory-Based Attraction to Signs** \( F_{fik} \):
+Same as \( F_{eik} \), but persists after the sign is out of sight.
+
+- **Exit Attraction** \( F_{gi} \):
+\[
+F_{gi} = g_i
+\]
+Drives agents toward a known exit nearby.
+
+- **Panic Avoidance** \( F_{hi} \):
+\[
+F_{hi} = h_i
+\]
+Pushes agents away from the panic origin.
+
+---
+
+### 3. **Random Force** \( F_{31} \)
+
+Models stochastic disturbances:
+
+\[
+F_{31} =
+\begin{cases}
+  q_1 \cdot \text{rand}() & \text{if } d_i > d \\
+ -q_2 \cdot \text{rand}() & \text{if } d_i \leq d \text{ and } b_{wi} > 0 \\
+ -q_1 \cdot \text{rand}() & \text{if } d_i \leq d \text{ and } b_{wi} \leq 0
+\end{cases}
+\]
+
+Where `rand()` is a unit vector in a random direction.
+
+---
+
+## Implementation Notes
+- Forces are modular Python functions for testing and reuse
+- Agents interact with each other and with walls (modeled via Shapely)
+- Basic Euler integration is used to update agent positions
+
+---
+
+## Future Extensions
+- Multiple agents
+- Complex geometries (e.g., rooms, corridors)
+- Leader-following behavior
+- Exit prioritization
+
+---
+
+## References
+- K. Hirai and K. Tarui, "A Simulation of the Behavior of a Crowd in Panic", Kobe University, 1975.
+- S. Sakai and R. Suzuki, "Model of Schooling Fish", Report No. HEE 73-4, IECE Japan, 1973.
+
+---
+
+**License:** For research and educational use.
+
