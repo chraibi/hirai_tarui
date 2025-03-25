@@ -1,6 +1,6 @@
 # Hirai and Tarui Crowd Simulation Model
 
-This repository implements the pedestrian dynamics model proposed by **Hirai and Tarui** (1975) for simulating the behavior of crowds under panic conditions. The model incorporates psychological and environmental factors, including wall repulsion, attraction to exits, and social interaction.
+This repository implements the pedestrian dynamics model proposed by **Hirai and Tarui** (1975) for simulating the behavior of crowds.
 
 ---
 
