@@ -93,25 +93,46 @@ def F_wi(
         else:
             strength = w1
 
-        return strength * e_w
+        return strength * e_w, e_w
 
-    return np.zeros(2)
+    return np.zeros(2), np.array([1.0, 0.0])  # arbitrary unit vector (not used)
 
 
-def F_eik(x_i: np.ndarray, signs: List[np.ndarray], eta: float = 1.0) -> np.ndarray:
-    """Equation (7): Influence of visible signs."""
+def F_eik(
+    x_i: np.ndarray,
+    v_i: np.ndarray,
+    signs: List[np.ndarray],
+    eta: float = 1.0,
+    vision_radius: float = 1.5,
+    fov_angle: float = np.pi * 2 / 3,  # 120 degrees
+) -> np.ndarray:
+    """Equation (9): Influence of visible signs within field of view and radius.
+
+    This is immediate memory-based attraction.
+    """
     force = np.zeros(2)
     for P_k in signs:
+        dir_vec = P_k - x_i
+        dist = np.linalg.norm(dir_vec)
+        if dist <= vision_radius:
+            angle = angle_between(v_i, dir_vec)
+            if angle <= fov_angle / 2:
+                force += eta * dir_vec / dist
+    return force
+
+
+def F_fik(x_i: np.ndarray, mem_signs: List[np.ndarray], eta: float = 1.0) -> np.ndarray:
+    """Equation (9) modified: Influence of memorized signs.
+
+    Unlike F_eik this is a persistent memory-based attraction.
+    """
+    force = np.zeros(2)
+    for P_k in mem_signs:
         dir_vec = P_k - x_i
         dist = np.linalg.norm(dir_vec)
         if dist > 0:
             force += eta * dir_vec / dist
     return force
-
-
-def F_fik(x_i: np.ndarray, mem_signs: List[np.ndarray], eta: float = 1.0) -> np.ndarray:
-    """Equation (8): Influence of memorized signs."""
-    return F_eik(x_i, mem_signs, eta)
 
 
 def F_gi(
@@ -136,6 +157,6 @@ def F_31(
     if di > d:
         return q1 * random_unit()
     elif bwi > 0:
-        return -q2 * random_unit()
+        return q2 * random_unit()
     else:
-        return -q1 * random_unit()
+        return q1 * random_unit()

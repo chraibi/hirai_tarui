@@ -1,4 +1,7 @@
+import numpy as np
 from dataclasses import dataclass
+
+
 @dataclass
 class ForceParameters:
     # Driving force
@@ -19,5 +22,9 @@ class ForceParameters:
     # Random force
     q1: float = 1.0
     q2: float = 2.0
-    random_threshold: float = 1.0
     hi: float = 1.0
+
+    vision_radius: float = 1.5
+    fov_angle: float = np.pi * 2 / 3  # 120 degrees
+
+    exit_domain_radius: float = 4.0

@@ -4,7 +4,7 @@ import numpy as np
 from shapely.geometry import Polygon, Point
 from typing import List, Tuple
 from .parameters import ForceParameters
-
+from .utils import angle_between
 from .forces import (
     F_ai,
     F_bi,
@@ -42,6 +42,8 @@ class Agent:
         self.m = mass
         self.nu = damping
         self.acc = np.zeros(2)
+        self.mem_signs = []
+        self.last_exit_seen = []
         self.params = params or ForceParameters()
 
     def update(self, dt: float):
@@ -49,12 +51,20 @@ class Agent:
         self.v += dt * self.acc
         self.x += dt * self.v
 
+    def get_visible_signs(self, signs):
+        visible_now = []
+        for P_k in signs:
+            dist = np.linalg.norm(P_k - self.x)
+            angle = angle_between(self.v, P_k - self.x)
+            if dist <= self.params.vision_radius and angle <= self.params.fov_angle / 2:
+                visible_now.append(P_k)
+        return visible_now
+
     def compute_forces(
         self,
         others: List[Tuple[np.ndarray, np.ndarray]],
         polygons: List[Polygon],
         signs: List[np.ndarray],
-        mem_signs: List[np.ndarray],
         exits: List[Polygon],
         h_i: np.ndarray,
     ):
@@ -66,7 +76,6 @@ class Agent:
             others: List of other agents as (position, velocity).
             polygons: List of polygons representing walls and obstacles.
             signs: Positions of visible signs.
-            mem_signs: Positions of memorized signs.
             exits: Exit areas as polygons.
             h_i: External influence (herding).
         """
@@ -74,7 +83,7 @@ class Agent:
         f_bi = F_bi(self.x, self.v, others, c_func)
         f_ci = F_ci(self.x, self.v, others, h_func)
 
-        f_wi = F_wi(
+        f_wi, e_w = F_wi(
             self.x,
             self.v,
             polygons,
@@ -82,23 +91,56 @@ class Agent:
             w0=self.params.wall_strength_into,
             w1=self.params.wall_strength_always,
         )
+        ###################### signs and exits
+        exit_centers = [np.array(exit.centroid.coords[0]) for exit in exits]
+        min_exit_dist = min(np.linalg.norm(self.x - c) for c in exit_centers)
+        self.last_exit_seen = np.argmin(
+            [np.linalg.norm(self.x - c) for c in exit_centers]
+        )
 
-        f_eik = F_eik(self.x, signs, eta=self.params.eta_sign)
-        f_fik = F_fik(self.x, mem_signs, eta=self.params.eta_mem)
-        f_gi = F_gi(self.x, exits, strength=self.params.exit_strength)
+        if min_exit_dist <= self.params.exit_domain_radius:
+            # Close to exit → apply only F_gi
+            f_gi = F_gi(self.x, exits, strength=self.params.exit_strength)
+            f_eik = np.zeros(2)
+            f_fik = np.zeros(2)
+        else:
+            visible_now = self.get_visible_signs(signs)
+            f_gi = np.zeros(2)
+            # Memorize visible signs
+            for P_k in visible_now:
+                if not any(np.allclose(P_k, mem) for mem in self.mem_signs):
+                    self.mem_signs.append(P_k)
+
+            # Choose between visible-sign force and memorized-sign force (never both)
+            if visible_now:
+                f_eik = F_eik(
+                    self.x,
+                    self.v,
+                    signs,
+                    eta=self.params.eta_sign,
+                    vision_radius=self.params.vision_radius,
+                    fov_angle=self.params.fov_angle,
+                )
+                f_fik = np.zeros(2)
+            else:
+                f_eik = np.zeros(2)
+                f_fik = F_fik(self.x, self.mem_signs, eta=self.params.eta_mem)
+        ##################### signs and exits
+
         f_hi = F_hi(h_i)
         di = (
             min([wall.exterior.distance(Point(self.x)) for wall in polygons])
             if polygons
             else 1.0
         )
-        bwi = np.dot(self.v, self.v)
+
+        bwi = np.dot(f_wi, e_w)
         f_31 = F_31(
             di,
             bwi,
             q1=self.params.q1,
             q2=self.params.q2,
-            d=self.params.random_threshold,
+            d=self.params.wall_distance,
         )
 
         F11 = f_ai + f_bi + f_ci
