@@ -70,7 +70,7 @@ class Agent:
         polygons: List[Polygon],
         signs: List[np.ndarray],
         exits: List[Polygon],
-        h_i: np.ndarray,
+        x_panic: np.ndarray,
     ):
         """Compute total force acting on the agent using the model equations.
 
@@ -131,7 +131,8 @@ class Agent:
                 f_fik = F_fik(self.x, self.mem_signs, eta=self.params.eta_mem)
         ##################### signs and exits
 
-        f_hi = F_hi(h_i)
+        f_hi = F_hi(self.x, x_panic, self.params.hi)
+
         di = (
             min([wall.exterior.distance(Point(self.x)) for wall in polygons])
             if polygons

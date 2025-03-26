@@ -146,9 +146,24 @@ def F_gi(
     return strength * normalize(center - x_i)
 
 
-def F_hi(h_i: np.ndarray) -> np.ndarray:
-    """Equation (10): Herding force (external influence)."""
-    return h_i
+def F_hi(x_i: np.ndarray, x_panic: np.ndarray, strength: float = 1.0) -> np.ndarray:
+    """
+    Equation (10): Herding or panic repulsion force.
+    Applies a constant force of magnitude `strength` away from the panic site.
+
+    Parameters:
+    - x_i: Position of individual i (2D or 3D vector).
+    - x_panic: Position of panic center (2D or 3D vector).
+    - strength: Magnitude of the force.
+
+    Returns:
+    - A force vector pointing from the panic site to the individual, with magnitude `strength`.
+    """
+    direction = x_i - x_panic
+    distance = np.linalg.norm(direction)
+    if distance == 0:
+        return np.zeros_like(x_i)  # no direction if exactly at panic site
+    return strength * (direction / distance)
 
 
 def F_31(
