@@ -115,10 +115,13 @@ Where `rand()` is a unit vector in a random direction.
 ---
 
 ## Future Extensions
-- Multiple agents
-- Complex geometries (e.g., rooms, corridors)
-- Leader-following behavior
-- Exit prioritization
+- Calibration
+
+
+
+
+https://github.com/user-attachments/assets/d58b6049-3dde-448e-a8e6-c35dedf4ad62
+
 
 ---
 
