@@ -96,6 +96,23 @@ Same as $F_{eik}$, but persists after the sign is out of sight.
 $$F_{gi} = g_i$$
 Drives agents toward a known exit nearby.
 
+### Summary of Region-Specific Forces
+
+The model assumes that different forces act in mutually exclusive regions:
+
+| Region                       | Active Forces                      |
+|-----------------------------|------------------------------------|
+| **Exit domain** (near exit) | `F_gi` (goal/exit attraction only) |
+| **Visible sign domain**     | `F_eik` (only if sign is visible)  |
+| **Memory domain**           | `F_fik` (only if sign was memorized) |
+| **All other regions**       | Wall, social, cohesion, fluctuation forces |
+
+> **Note**:  
+`F_gi`, `F_eik`, and `F_fik` are **never active at the same time**.  
+Each agent experiences only one of them depending on their location and memory state.
+
+
+
 - **Panic Avoidance** $F_{hi}$:
 
 $$F_{hi} = h_i$$
