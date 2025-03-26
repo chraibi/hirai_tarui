@@ -59,15 +59,7 @@ $$F_{21} = F_{wi} + \sum_k (F_{eik} + F_{fik}) + F_{gi} + F_{hi}$$
 
 Repels agents from walls:
 
-
-$$
-F_{wi} =
-\begin{cases}
-0 & \text{if } d_i > d \\\\
-\left( w_0 v_{wi} \frac{(d - d_i)}{d} + w_1 \right) \cdot \mathbf{e}_w & \text{if } d_i < d \text{ and } v_{wi} > 0 \\\\
-w_1 \cdot \mathbf{e}_w & \text{if } d_i < d \text{ and } v_{wi} \le 0
-\end{cases}
-$$
+<img width="482" alt="grafik" src="https://github.com/user-attachments/assets/81de3c47-c734-4d5a-a4ee-e98238c0d4a2" />
 
 Where:
 
