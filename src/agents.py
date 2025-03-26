@@ -3,6 +3,7 @@
 import numpy as np
 from shapely.geometry import Polygon, Point
 from typing import List, Tuple
+from .parameters import ForceParameters
 
 from .forces import (
     F_ai,
@@ -26,6 +27,7 @@ class Agent:
         velocity: List[float],
         mass: float = 1.0,
         damping: float = 0.5,
+        params=None,
     ):
         """Create a new agent.
 
@@ -40,6 +42,7 @@ class Agent:
         self.m = mass
         self.nu = damping
         self.acc = np.zeros(2)
+        self.params = params or ForceParameters()
 
     def update(self, dt: float):
         """Update position and velocity using current acceleration."""
@@ -67,15 +70,22 @@ class Agent:
             exits: Exit areas as polygons.
             h_i: External influence (herding).
         """
-        f_ai = F_ai(self.v)
+        f_ai = F_ai(self.v, a=self.params.a)
         f_bi = F_bi(self.x, self.v, others, c_func)
         f_ci = F_ci(self.x, self.v, others, h_func)
 
-        f_wi = F_wi(self.x, self.v, polygons)
+        f_wi = F_wi(
+            self.x,
+            self.v,
+            polygons,
+            d=self.params.wall_distance,
+            w0=self.params.wall_strength_close,
+            w1=self.params.wall_strength_far,
+        )
 
-        f_eik = F_eik(self.x, signs)
-        f_fik = F_fik(self.x, mem_signs)
-        f_gi = F_gi(self.x, exits)
+        f_eik = F_eik(self.x, signs, eta=self.params.eta_sign)
+        f_fik = F_fik(self.x, mem_signs, eta=self.params.eta_mem)
+        f_gi = F_gi(self.x, exits, strength=self.params.exit_strength)
         f_hi = F_hi(h_i)
         di = (
             min([wall.exterior.distance(Point(self.x)) for wall in polygons])
@@ -83,7 +93,13 @@ class Agent:
             else 1.0
         )
         bwi = np.dot(self.v, self.v)
-        f_31 = F_31(di, bwi)
+        f_31 = F_31(
+            di,
+            bwi,
+            q1=self.params.q1,
+            q2=self.params.q2,
+            d=self.params.random_threshold,
+        )
 
         F11 = f_ai + f_bi + f_ci
         F21 = f_wi + f_eik + f_fik + f_gi + f_hi
