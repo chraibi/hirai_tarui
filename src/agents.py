@@ -79,8 +79,8 @@ class Agent:
             self.v,
             polygons,
             d=self.params.wall_distance,
-            w0=self.params.wall_strength_close,
-            w1=self.params.wall_strength_far,
+            w0=self.params.wall_strength_into,
+            w1=self.params.wall_strength_always,
         )
 
         f_eik = F_eik(self.x, signs, eta=self.params.eta_sign)

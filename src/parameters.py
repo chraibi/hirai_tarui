@@ -6,8 +6,8 @@ class ForceParameters:
 
     # Wall interaction
     wall_distance: float = 1.0
-    wall_strength_close: float = 6.0
-    wall_strength_far: float = 6.0
+    wall_strength_into: float = 6.0
+    wall_strength_always: float = 6.0
 
     # Sign attraction
     eta_sign: float = 1.0

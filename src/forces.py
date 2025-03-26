@@ -86,10 +86,14 @@ def F_wi(
 
     if closest_wall is not None and min_dist < d:
         closest_point = closest_wall.interpolate(closest_wall.project(point))
-        direction = normalize(x_i - np.array(closest_point.coords[0]))
-        v_perp = np.dot(v_i, direction)
-        strength = w1 if v_perp > 0 else w0
-        return strength * direction * (1 - min_dist / d)
+        e_w = normalize(x_i - np.array(closest_point.coords[0]))  # away from the wall
+        v_wi = -np.dot(v_i, e_w)  # sign convention from paper: into wall = positive
+        if v_wi > 0:
+            strength = (w0 * v_wi * (d - min_dist) / d) + w1
+        else:
+            strength = w1
+
+        return strength * e_w
 
     return np.zeros(2)
 

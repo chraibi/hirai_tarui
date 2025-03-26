@@ -59,15 +59,28 @@ $$F_{21} = F_{wi} + \sum_k (F_{eik} + F_{fik}) + F_{gi} + F_{hi}$$
 
 Repels agents from walls:
 
-$$F_{wi} =
+
+$$
+F_{wi} =
 \begin{cases}
-  w_1 e_w & \text{if } d_i < d \text{ and } v_{wi} > 0 \\
-  w_0 e_w & \text{if } d_i < d \text{ and } v_{wi} \leq 0 \\
-  0 & \text{otherwise}
+0 & \text{if } d_i > d \\\\
+\left( w_0 v_{wi} \frac{(d - d_i)}{d} + w_1 \right) \cdot \mathbf{e}_w & \text{if } d_i < d \text{ and } v_{wi} > 0 \\\\
+w_1 \cdot \mathbf{e}_w & \text{if } d_i < d \text{ and } v_{wi} \le 0
 \end{cases}
 $$
 
-Where $e_w$ is the unit vector away from the wall.
+Where:
+
+- $\mathbf{e}_w$ is the unit vector pointing **away from the wall**
+- $v_{wi}$ is the component of velocity **along $-\mathbf{e}_w$** (i.e., *into* the wall is positive)
+- $d_i$ is the **actual distance** from the agent to the wall
+- $d$ is the **cutoff distance**: the maximum range in which the wall force acts
+
+This force **slows down the agent as they approach the wall**, and **acts only within a threshold distance**.
+
+
+![fig](figs/wall.png)
+
 
 - **Attraction to Signs** $F_{eik}$:
   
