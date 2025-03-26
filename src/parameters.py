@@ -24,7 +24,7 @@ class ForceParameters:
     q2: float = 2.0
     hi: float = 1.0
 
-    vision_radius: float = 1.5
+    sign_vision_radius: float = 1.5
     fov_angle: float = np.pi * 2 / 3  # 120 degrees
 
     exit_domain_radius: float = 4.0

@@ -53,10 +53,14 @@ class Agent:
 
     def get_visible_signs(self, signs):
         visible_now = []
-        for P_k in signs:
+        for sign in signs:
+            P_k = np.array(sign.centroid.coords[0])
             dist = np.linalg.norm(P_k - self.x)
             angle = angle_between(self.v, P_k - self.x)
-            if dist <= self.params.vision_radius and angle <= self.params.fov_angle / 2:
+            if (
+                dist <= self.params.sign_vision_radius
+                and angle <= self.params.fov_angle / 2
+            ):
                 visible_now.append(P_k)
         return visible_now
 
@@ -118,7 +122,7 @@ class Agent:
                     self.v,
                     signs,
                     eta=self.params.eta_sign,
-                    vision_radius=self.params.vision_radius,
+                    vision_radius=self.params.sign_vision_radius,
                     fov_angle=self.params.fov_angle,
                 )
                 f_fik = np.zeros(2)

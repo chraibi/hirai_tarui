@@ -111,7 +111,8 @@ def F_eik(
     This is immediate memory-based attraction.
     """
     force = np.zeros(2)
-    for P_k in signs:
+    for sign in signs:
+        P_k = np.array(sign.centroid.coords[0])
         dir_vec = P_k - x_i
         dist = np.linalg.norm(dir_vec)
         if dist <= vision_radius:
