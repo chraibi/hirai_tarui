@@ -120,6 +120,11 @@ Encourages alignment of motion in local groups.
 
 $$h(x_i, \dot{x}_i, x_j) = h_1(r^{ij}) h_2(\theta^{ij})$$
 
+
+
+![fig](figs/agents_interaction.png)
+
+
 ---
 
 ### 2. **Environmental Force** $F_{21}$
