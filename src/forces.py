@@ -101,24 +101,34 @@ def F_wi(
 def F_eik(
     x_i: np.ndarray,
     v_i: np.ndarray,
-    signs: List[np.ndarray],
+    signs: List[Tuple[np.ndarray, np.ndarray]],
     eta: float = 1.0,
     vision_radius: float = 1.5,
-    fov_angle: float = np.pi * 2 / 3,  # 120 degrees
+    fov_angle: float = np.pi * 2 / 3,  # agent's field of view
+    sign_fov: float = np.pi * 0.5,  # sign's "facing cone"
 ) -> np.ndarray:
-    """Equation (9): Influence of visible signs within field of view and radius.
+    """Equation (9): Influence of visible signs with directional constraints.
 
-    This is immediate memory-based attraction.
+    A sign attracts an agent only if:
+    - the agent is within the sign's vision radius
+    - the agent is within the sign's directional cone
+    - the sign is within the agent's field of view
     """
     force = np.zeros(2)
-    for sign in signs:
-        P_k = np.array(sign.centroid.coords[0])
-        dir_vec = P_k - x_i
-        dist = np.linalg.norm(dir_vec)
-        if dist <= vision_radius:
-            angle = angle_between(v_i, dir_vec)
-            if angle <= fov_angle / 2:
-                force += eta * dir_vec / dist
+    for sign_position, sign_direction in signs:
+        to_agent = x_i - sign_position
+        to_sign = sign_position - x_i
+
+        dist = np.linalg.norm(to_agent)
+        if dist > vision_radius:
+            continue
+
+        angle_agent_to_sign = angle_between(sign_direction, to_agent)
+        angle_sign_to_agent = angle_between(v_i, to_sign)
+
+        if angle_agent_to_sign <= sign_fov / 2 and angle_sign_to_agent <= fov_angle / 2:
+            force += eta * normalize(sign_position - x_i)
+
     return force
 
 
@@ -161,8 +171,9 @@ def F_hi(x_i: np.ndarray, x_panic: np.ndarray, strength: float = 1.0) -> np.ndar
     """
     direction = x_i - x_panic
     distance = np.linalg.norm(direction)
-    if distance == 0:
+    if distance == 0 or distance > 40:
         return np.zeros_like(x_i)  # no direction if exactly at panic site
+
     return strength * (direction / distance)
 
 

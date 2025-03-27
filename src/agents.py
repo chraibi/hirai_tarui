@@ -51,10 +51,9 @@ class Agent:
         self.v += dt * self.acc
         self.x += dt * self.v
 
-    def get_visible_signs(self, signs):
+    def get_visible_signs(self, sign_points):
         visible_now = []
-        for sign in signs:
-            P_k = np.array(sign.centroid.coords[0])
+        for P_k in sign_points:
             dist = np.linalg.norm(P_k - self.x)
             angle = angle_between(self.v, P_k - self.x)
             if (
@@ -68,7 +67,7 @@ class Agent:
         self,
         others: List[Tuple[np.ndarray, np.ndarray]],
         polygons: List[Polygon],
-        signs: List[np.ndarray],
+        signs: Tuple[List[np.ndarray], List[np.ndarray]],
         exits: List[Polygon],
         x_panic: np.ndarray,
     ):
@@ -95,7 +94,7 @@ class Agent:
             w0=self.params.wall_strength_into,
             w1=self.params.wall_strength_always,
         )
-        ###################### signs and exits
+        # ------------------- signs and exits
         exit_centers = [np.array(exit.centroid.coords[0]) for exit in exits]
         min_exit_dist = min(np.linalg.norm(self.x - c) for c in exit_centers)
         self.last_exit_seen = np.argmin(
@@ -108,7 +107,7 @@ class Agent:
             f_eik = np.zeros(2)
             f_fik = np.zeros(2)
         else:
-            visible_now = self.get_visible_signs(signs)
+            visible_now = self.get_visible_signs(signs[0])
             f_gi = np.zeros(2)
             # Memorize visible signs
             for P_k in visible_now:
@@ -129,7 +128,7 @@ class Agent:
             else:
                 f_eik = np.zeros(2)
                 f_fik = F_fik(self.x, self.mem_signs, eta=self.params.eta_mem)
-        ##################### signs and exits
+        # ------------ signs and exits
 
         f_hi = F_hi(self.x, x_panic, self.params.hi)
 
