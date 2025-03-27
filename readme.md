@@ -88,6 +88,10 @@ Same as $F_{eik}$, but persists after the sign is out of sight.
 $$F_{gi} = g_i$$
 Drives agents toward a known exit nearby.
 
+
+![fig](figs/scenario.png)
+
+
 ### Summary of Region-Specific Forces
 
 The model assumes that different forces act in mutually exclusive regions:
