@@ -23,6 +23,7 @@ from .forces import (
 class Agent:
     def __init__(
         self,
+        agent_id: int,
         position: List[float],
         velocity: List[float],
         mass: float = 1.0,
@@ -37,6 +38,7 @@ class Agent:
             mass: Agent mass.
             damping: Viscous damping coefficient.
         """
+        self.id = agent_id
         self.x = np.array(position, dtype=float)
         self.v = np.array(velocity, dtype=float)
         self.m = mass
@@ -51,16 +53,36 @@ class Agent:
         self.v += dt * self.acc
         self.x += dt * self.v
 
-    def get_visible_signs(self, sign_points):
+    def get_visible_signs(
+        self,
+        signs=Tuple[List[np.ndarray], List[np.ndarray]],
+        sign_fov_angle: float = np.pi * 0.5,
+    ) -> List[np.ndarray]:
+        """Check which signs are visible to the agent.
+
+        A sign is considered visible if:
+        - It is within the agent's vision radius and field of view (FOV).
+        - The agent is also within the sign's field of influence cone (based on sign orientation).
+        """
         visible_now = []
-        for P_k in sign_points:
-            dist = np.linalg.norm(P_k - self.x)
-            angle = angle_between(self.v, P_k - self.x)
-            if (
-                dist <= self.params.sign_vision_radius
-                and angle <= self.params.fov_angle / 2
-            ):
-                visible_now.append(P_k)
+        for P_k, o_k in signs:
+            r = P_k - self.x  # vector from agent to sign
+            dist = np.linalg.norm(r)
+
+            if dist <= self.params.sign_vision_radius:
+                # Agent's view toward the sign
+                angle_agent = angle_between(self.v, r)
+
+                # Sign's orientation vector (sign toward agent)
+                sign_to_agent = -r
+                angle_sign = angle_between(o_k, sign_to_agent)
+
+                if (
+                    angle_agent <= self.params.fov_angle / 2
+                    and angle_sign <= sign_fov_angle / 2
+                ):
+                    visible_now.append(P_k)
+
         return visible_now
 
     def compute_forces(
@@ -96,18 +118,21 @@ class Agent:
         )
         # ------------------- signs and exits
         exit_centers = [np.array(exit.centroid.coords[0]) for exit in exits]
-        min_exit_dist = min(np.linalg.norm(self.x - c) for c in exit_centers)
+        exit_distances = [np.linalg.norm(self.x - c) for c in exit_centers]
+        min_exit_dist = exit_distances[self.last_exit_seen]
         self.last_exit_seen = np.argmin(
             [np.linalg.norm(self.x - c) for c in exit_centers]
         )
 
         if min_exit_dist <= self.params.exit_domain_radius:
             # Close to exit → apply only F_gi
-            f_gi = F_gi(self.x, exits, strength=self.params.exit_strength)
+            f_gi = F_gi(
+                self.x, [exits[self.last_exit_seen]], strength=self.params.exit_strength
+            )
             f_eik = np.zeros(2)
             f_fik = np.zeros(2)
         else:
-            visible_now = self.get_visible_signs(signs[0])
+            visible_now = self.get_visible_signs(signs)
             f_gi = np.zeros(2)
             # Memorize visible signs
             for P_k in visible_now:
@@ -151,8 +176,9 @@ class Agent:
         F21 = f_wi + f_eik + f_fik + f_gi + f_hi
         F_total = F11 + F21 + f_31
         # debug all forces
-        debug = 0
-        if debug:
+        debug = 1
+        if debug and self.id == 1:
+            print(f"{self.last_exit_seen = }, {self.mem_signs = }")
             print("f_ai", f_ai)
             print("f_bi", f_bi)
             print("f_ci", f_ci)
