@@ -32,6 +32,35 @@ $$F_{ai} = a \cdot \hat{x}_i$$
 
 Pushes the individual forward in the direction of motion.
 
+This function alone leads to a constant acceleration. 
+However, with the damping parameter $\nu_i$ the agents accelerate indeed to a constant speed.
+
+The agent's velocity $v(t)$ follows from the equation of motion:
+
+$$
+m \frac{d\vec{v}}{dt} = a \frac{\vec{v}}{|\vec{v}|} - \nu \vec{v}
+$$
+
+Assuming motion in a fixed direction (i.e., constant direction of $\vec{v}$) and starting from $v(0) = 0$, the scalar form becomes:
+
+$$
+\frac{dv}{dt} = \frac{a}{m} - \frac{\nu}{m} v
+$$
+
+This is a linear first-order ODE with solution:
+
+$$
+v(t) = \frac{a}{\nu} \left(1 - e^{-\frac{\nu}{m}t} \right)
+$$
+
+where:
+- $a$ is the magnitude of the driving force,
+- $\nu$ is the damping coefficient,
+- $m$ is the mass of the agent.
+
+
+![fig](figs/speed_time.png)
+
 #### (b) Attraction / Repulsion:
 
 $$F_{bi} = - \sum_j c(x_i, \dot{x}_i, x_j) \frac{x_j - x_i}{r^{ij}}$$

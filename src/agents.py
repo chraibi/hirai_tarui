@@ -26,7 +26,7 @@ class Agent:
         agent_id: int,
         position: List[float],
         velocity: List[float],
-        mass: float = 1.0,
+        mass: float = 80.0,
         damping: float = 0.5,
         params=None,
     ):
