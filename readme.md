@@ -100,8 +100,14 @@ where:
 - $\nu$ is the damping coefficient,
 - $m$ is the mass of the agent.
 
+> Note: The similarity to the traditional driving force in force-based models, e.g. the social force model.
+> Hereby,
+> 
+> $v^0 = \frac{a}{\mu}$ and  $\tau = \frac{m}{\mu}$
+
 
 ![fig](figs/speed_time.png)
+
 
 #### (b) Attraction / Repulsion:
 
