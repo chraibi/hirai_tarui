@@ -45,7 +45,7 @@ class Agent:
         self.nu = damping
         self.acc = np.zeros(2)
         self.mem_signs = []
-        self.last_exit_seen = []
+        self.last_exit_seen = 0
         self.params = params or ForceParameters()
 
     def update(self, dt: float):
@@ -155,7 +155,7 @@ class Agent:
                 f_fik = F_fik(self.x, self.mem_signs, eta=self.params.eta_mem)
         # ------------ signs and exits
 
-        f_hi = F_hi(self.x, x_panic, self.params.hi)
+        f_hi = F_hi(self.x, x_panic, self.params.hi, self.params.cutoff_hi)
 
         di = (
             min([wall.exterior.distance(Point(self.x)) for wall in polygons])
@@ -176,7 +176,7 @@ class Agent:
         F21 = f_wi + f_eik + f_fik + f_gi + f_hi
         F_total = F11 + F21 + f_31
         # debug all forces
-        debug = 1
+        debug = 0
         if debug and self.id == 1:
             print(f"{self.last_exit_seen = }, {self.mem_signs = }")
             print("f_ai", f_ai)

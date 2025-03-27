@@ -22,8 +22,9 @@ class ForceParameters:
     # Random force
     q1: float = 1.0
     q2: float = 2.0
+    # panic force
     hi: float = 1.0
-
+    cutoff_hi: float = 20
     sign_vision_radius: float = 1.5
     fov_angle: float = np.pi * 2 / 3  # 120 degrees
 
