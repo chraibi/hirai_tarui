@@ -22,6 +22,48 @@ Where:
 
 ---
 
+## Summary of forces
+
+In the Hirai and Tarui model, there are **9 forces** explicitly defined, and they are grouped into three conceptual categories. 
+Here's the full list:
+
+### 🟦 Self-Motivated Force
+
+| Symbol     | Name                | Equation in Paper | Description                                   |
+|------------|---------------------|-------------------|-----------------------------------------------|
+| $F_{a_i}$  | Self-driving force  | (3)               | Moves the agent forward at a constant desired speed. |
+
+
+### 🟥 Interpersonal & Environmental Forces
+
+| Symbol     | Name               | Equation | Description                                                  |
+|------------|--------------------|----------|--------------------------------------------------------------|
+| $F_{b_i}$  | Avoidance force    | (4)      | Repulsive force from nearby individuals.                     |
+| $F_{c_i}$  | Cohesion force     | (5)      | Attractive force toward group members.                       |
+| $F_{w_i}$  | Wall repulsion     | (8)      | Repulsion from walls; strength depends on distance and velocity component into the wall. |
+
+
+
+### 🟩 Goal-Oriented Forces
+
+| Symbol     | Name                     | Equation | Description                                                               |
+|------------|--------------------------|----------|---------------------------------------------------------------------------|
+| $F_{e_{ik}}$ | Visible sign attraction | (9)      | Attraction toward visible signs within field of view.                     |
+| $F_{f_{ik}}$ | Memorized sign force    | (10)     | Attraction to previously seen signs even when no longer visible.          |
+| $F_{g_i}$    | Exit force              | (4)      | Attraction toward exit if agent is within exit's effective radius.        |
+
+
+
+### 🟨 External Influence & Noise
+
+| Symbol     | Name                    | Equation | Description                                                |
+|------------|-------------------------|----------|------------------------------------------------------------|
+| $F_{h_i}$  | Herding force           | (10)     | External influence (e.g., crowd herding).                  |
+| $F_{31}$   | Random fluctuation      | (11)     | Randomized fluctuation force depending on wall proximity. |
+
+
+---
+
 ## Components of the Forces
 
 ### 1. **Social Force** $F_{11} = F_{ai} + F_{bi} + F_{ci}$
@@ -32,7 +74,7 @@ $$F_{ai} = a \cdot \hat{x}_i$$
 
 Pushes the individual forward in the direction of motion.
 
-This function alone leads to a constant acceleration. 
+This function alone leads to a constant acceleration.
 However, with the damping parameter $\nu_i$ the agents accelerate indeed to a constant speed.
 
 The agent's velocity $v(t)$ follows from the equation of motion:
@@ -173,9 +215,17 @@ Where `rand()` is a unit vector in a random direction.
 - Calibration
 
 
+## Simulation of the original scenario from the paper
+
+The paper shows simulations of a passage:
+
+![Screenshot 2025-03-27 at 16 41 31](https://github.com/user-attachments/assets/f2116b16-9dff-4fc6-9b1c-6345a7480365)
 
 
-https://github.com/user-attachments/assets/d58b6049-3dde-448e-a8e6-c35dedf4ad62
+
+
+https://github.com/user-attachments/assets/a68b7b05-6154-4a4a-bbce-4f33a5575c71
+
 
 
 ---
