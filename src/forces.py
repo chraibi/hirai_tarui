@@ -7,59 +7,151 @@ from typing import List, Tuple
 from .utils import normalize, angle_between, extract_segments, random_unit
 
 
-def c_func(dist: float, angle: float) -> float:
-    """Function c(dist, angle) from the paper. Equation (4)."""
-    return np.exp(-dist) * np.cos(angle)
+# --- c1(r_ij): distance-based repulsion
+def c1(r, cn0=-0.5, cr0=1.0, beta=1.0, gamma=2.0, epsilon=3.0):
+    if r < beta:
+        return cn0 + (cr0 - cn0) * (r / beta)
+    elif r < gamma:
+        return cr0
+    elif r < epsilon:
+        return cr0 * (1 - (r - gamma) / (epsilon - gamma))
+    else:
+        return 0.0
 
 
-def h_func(dist: float, angle: float) -> float:
-    """Function h(dist, angle) from the paper. Equation (5)."""
-    return np.exp(-dist) * np.cos(angle)
+# --- h1(r_ij): distance-based cohesion
+def h1(r, hr0=1.0, lam=2.0, sigma=3.0):
+    if r < lam:
+        return hr0
+    elif r < sigma:
+        return hr0 * (1 - (r - lam) / (sigma - lam))
+    else:
+        return 0.0
 
 
-# --- Force Components ---
-def F_ai(velocity: np.ndarray, a: float = 1.0) -> np.ndarray:
-    """Equation (2): Individual's own driving force."""
-    return a * normalize(velocity)
+# --- c2(phi_ij): angle-based repulsion
+def c2(
+    phi,
+    cphi1=1.0,
+    cphi2=0.5,
+    phi1=np.pi / 6,
+    phi2=np.pi / 3,
+    phi3=2 * np.pi / 3,
+    phi4=5 * np.pi / 6,
+):
+    if phi < phi1:
+        return cphi1
+    elif phi < phi2:
+        return cphi1 - (cphi1 - cphi2) * (phi - phi1) / (phi2 - phi1)
+    elif phi < phi3:
+        return cphi2
+    elif phi < phi4:
+        return cphi2 * (1 - (phi - phi3) / (phi4 - phi3))
+    else:
+        return 0.0
 
 
-def F_bi(
-    x_i: np.ndarray,
-    v_i: np.ndarray,
-    others: List[Tuple[np.ndarray, np.ndarray]],
-    c_func,
-) -> np.ndarray:
-    """Equation (4): Influence from surrounding individuals."""
-    force = np.zeros(2)
-    for x_j, v_j in others:
-        r_ij = x_j - x_i
-        dist = np.linalg.norm(r_ij)
-        angle = angle_between(v_i, r_ij)
-        if dist > 0:
-            c = c_func(dist, angle)
-            force += -c * (r_ij / dist)
-    return force
+# --- h2(phi_ij): angle-based cohesion (same structure as c2)
+def h2(
+    phi,
+    hphi1=1.0,
+    hphi2=0.5,
+    phi1=np.pi / 6,
+    phi2=np.pi / 3,
+    phi3=2 * np.pi / 3,
+    phi4=5 * np.pi / 6,
+):
+    if phi < phi1:
+        return hphi1
+    elif phi < phi2:
+        return hphi1 - (hphi1 - hphi2) * (phi - phi1) / (phi2 - phi1)
+    elif phi < phi3:
+        return hphi2
+    elif phi < phi4:
+        return hphi2 * (1 - (phi - phi3) / (phi4 - phi3))
+    else:
+        return 0.0
 
 
 def F_ci(
     x_i: np.ndarray,
     v_i: np.ndarray,
     others: List[Tuple[np.ndarray, np.ndarray]],
-    h_func,
+    h1_func,
+    h2_func,
 ) -> np.ndarray:
-    """Equation (5): Cohesion with group members."""
+    """
+    Equation (5): Cohesion force based on velocity alignment.
+
+    F_ci = (1/M) * sum_j [ h(x_i, v_i, x_j) * (v_j - v_i) ]
+
+    where h = h1(r_ij) * h2(phi_ij)
+
+    Args:
+        x_i: Position of agent i
+        v_i: Velocity of agent i
+        others: List of (x_j, v_j)
+        h1_func: function of distance
+        h2_func: function of angle
+
+    Returns:
+        np.ndarray: Cohesion force vector
+    """
     force = np.zeros(2)
     M = len(others)
     if M == 0:
         return force
+
     for x_j, v_j in others:
         r_ij = x_j - x_i
         dist = np.linalg.norm(r_ij)
-        angle = angle_between(v_i, r_ij)
         if dist > 0:
-            h = h_func(dist, angle)
-            force += h * (r_ij / dist)
-    return -force / M
+            phi_ij = angle_between(v_i, r_ij)
+            h = h1_func(dist) * h2_func(phi_ij)
+            force += h * (v_j - v_i)
+
+    return force / M
+
+
+def F_bi(
+    x_i: np.ndarray,
+    v_i: np.ndarray,
+    others: List[Tuple[np.ndarray, np.ndarray]],
+    c1_func,
+    c2_func,
+) -> np.ndarray:
+    """
+    Equation (4): Repulsion from surrounding individuals.
+
+    F_bi = sum_j [ c(x_i, v_i, x_j) * (x_j - x_i) / ||x_j - x_i|| ]
+
+    where c = c1(r_ij) * c2(phi_ij)
+
+    Args:
+        x_i: Position of agent i
+        v_i: Velocity of agent i
+        others: List of (x_j, v_j)
+        c1_func: function of distance
+        c2_func: function of angle
+
+    Returns:
+        np.ndarray: Repulsion force vector
+    """
+    force = np.zeros(2)
+    for x_j, _ in others:
+        r_ij = x_j - x_i
+        dist = np.linalg.norm(r_ij)
+        if dist > 0:
+            phi_ij = angle_between(v_i, r_ij)
+            c = c1_func(dist) * c2_func(phi_ij)
+            force += c * (r_ij / dist)
+    return -force
+
+
+# --- Force Components ---
+def F_ai(velocity: np.ndarray, a: float = 1.0) -> np.ndarray:
+    """Equation (2): Individual's own driving force."""
+    return a * normalize(velocity)
 
 
 def F_wi(
