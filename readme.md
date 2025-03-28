@@ -215,6 +215,96 @@ Where `rand()` is a unit vector in a random direction.
 
 ---
 
+
+## Model Parameters
+
+### Driving Force
+
+| Parameter | Description                                  | Used In    |
+|-----------|----------------------------------------------|------------|
+| `a`       | Strength of the driving force                | `F_ai`     |
+
+---
+
+### Wall Interaction
+
+| Parameter | Description                                                      | Used In    |
+|-----------|------------------------------------------------------------------|------------|
+| `d`       | Cutoff distance to consider wall repulsion                       | `F_wi`, `F_31` |
+| `w0`      | Wall repulsion strength when agent moves *into* the wall         | `F_wi`     |
+| `w1`      | Constant wall repulsion strength                                 | `F_wi`     |
+
+---
+
+### Agent Interaction
+
+#### Distance-Based Repulsion (via `c1`)
+
+| Parameter | Description                                                      | Used In    |
+|-----------|------------------------------------------------------------------|------------|
+| `cn0`     | Minimum (negative) repulsion at zero distance                    | `c1_func` → `F_bi` |
+| `cr0`     | Maximum repulsion plateau value                                  | `c1_func` → `F_bi` |
+| `beta`    | Distance at which repulsion crosses from negative to 0          | `c1_func` → `F_bi` |
+| `nu`      | Distance at which repulsion reaches `cr0`                        | `c1_func` → `F_bi` |
+| `gamma`   | Start of decay from `cr0`                                        | `c1_func` → `F_bi` |
+| `epsilon` | Distance where repulsion drops to 0                              | `c1_func` → `F_bi` |
+
+#### Angle-Based Repulsion (via `c2`)
+
+| Parameter | Description                                                      | Used In    |
+|-----------|------------------------------------------------------------------|------------|
+| `cphi1`   | Max repulsion for aligned direction                              | `c2_func` → `F_bi` |
+| `cphi2`   | Plateau value after initial drop                                 | `c2_func` → `F_bi` |
+| `phi1`-`phi4` | Transition angles for repulsion decay                        | `c2_func` → `F_bi` |
+
+#### Cohesion (via `h1`, `h2`)
+
+| Parameter | Description                                                      | Used In    |
+|-----------|------------------------------------------------------------------|------------|
+| `hr0`     | Maximum cohesion value                                           | `h1_func` → `F_ci` |
+| `lam`     | Constant cohesion up to this distance                            | `h1_func` → `F_ci` |
+| `sigma`   | Distance where cohesion vanishes                                 | `h1_func` → `F_ci` |
+| `hphi1`   | Maximum cohesion for angular alignment                            | `h2_func` → `F_ci` |
+| `hphi2`   | Intermediate angular cohesion                                     | `h2_func` → `F_ci` |
+
+---
+
+### Signs & Exits
+
+| Parameter         | Description                                              | Used In      |
+|------------------|----------------------------------------------------------|--------------|
+| `eta_sign`        | Strength of attraction toward visible signs             | `F_eik`      |
+| `eta_mem`         | Strength of attraction toward memorized signs           | `F_fik`      |
+| `vision_radius`   | Radius within which signs are visible to the agent      | `F_eik`      |
+| `fov_angle`       | Agent’s field of view angle                             | `F_eik`      |
+| `sign_fov`        | Sign’s own directional “cone of influence”              | `F_eik`      |
+| `exit_strength`   | Strength of attraction toward exits                     | `F_gi`       |
+
+---
+
+### Herding / Panic Influence
+
+| Parameter | Description                                                      | Used In    |
+|-----------|------------------------------------------------------------------|------------|
+| `x_panic` | Position of panic center (dynamic)                               | `F_hi`     |
+| `strength`| Herding force magnitude                                          | `F_hi`     |
+| `cutoff`  | Radius beyond which herding force is not applied                 | `F_hi`     |
+
+
+> note: `cutoff` and `x_panic` were added in this implementation although not mentioned in the original paper.
+
+---
+
+### 🎲 Random Force
+
+| Parameter | Description                                                      | Used In    |
+|-----------|------------------------------------------------------------------|------------|
+| `q1`      | Random force strength if far from wall or not moving into wall   | `F_31`     |
+| `q2`      | Random force strength if moving into wall                        | `F_31`     |
+
+
+
+
 ## Implementation Notes
 - Forces are modular Python functions for testing and reuse
 - Agents interact with each other and with walls (modeled via Shapely)
