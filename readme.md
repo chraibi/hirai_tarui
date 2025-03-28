@@ -316,13 +316,19 @@ Where `rand()` is a unit vector in a random direction.
 - Calibration
 
 
+## Simulation of overtaking a static pedestrian 
+
+
+
+https://github.com/user-attachments/assets/2c9c0ff8-7b12-4210-a4f9-26a797cd9634
+
+
+
 ## Simulation of the original scenario from the paper
 
 The paper shows simulations of a passage:
 
 ![Screenshot 2025-03-27 at 16 41 31](https://github.com/user-attachments/assets/f2116b16-9dff-4fc6-9b1c-6345a7480365)
-
-
 
 
 https://github.com/user-attachments/assets/a68b7b05-6154-4a4a-bbce-4f33a5575c71
