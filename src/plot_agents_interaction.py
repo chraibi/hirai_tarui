@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from .src.forces import c1_func, h1_func, c2_func, h2_func
+
+
 # --- Parameters ---
 # c1
 cn0 = -0.5
@@ -76,10 +79,10 @@ def h2(phi):
 # Generate data
 r_vals = np.linspace(0, 4, 500)
 phi_vals = np.linspace(0, np.pi, 500)
-c1_vals = [c1(r) for r in r_vals]
-h1_vals = [h1(r) for r in r_vals]
-c2_vals = [c2(p) for p in phi_vals]
-h2_vals = [h2(p) for p in phi_vals]
+c1_vals = [c1_func(r) for r in r_vals]
+h1_vals = [h1_func(r) for r in r_vals]
+c2_vals = [c2_func(p) for p in phi_vals]
+h2_vals = [h2_func(p) for p in phi_vals]
 
 # Plotting
 plt.rcParams["font.size"] = 12

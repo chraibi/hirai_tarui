@@ -1,9 +1,0 @@
-pedpy
-numpy
-matplotlib
-plotly
-shapely
-pandas
-nbformat
-jupedsim
-

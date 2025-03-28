@@ -8,9 +8,11 @@ from .utils import normalize, angle_between, extract_segments, random_unit
 
 
 # --- c1(r_ij): distance-based repulsion
-def c1(r, cn0=-0.5, cr0=1.0, beta=1.0, gamma=2.0, epsilon=3.0):
+def c1_func(r, nu=1.0, cn0=-0.5, cr0=1.0, beta=1.0, gamma=2.0, epsilon=3.0):
     if r < beta:
-        return cn0 + (cr0 - cn0) * (r / beta)
+        return cn0 + (0 - cn0) * (r / beta)
+    elif r < nu:
+        return cr0 * (r - beta) / (nu - beta)
     elif r < gamma:
         return cr0
     elif r < epsilon:
@@ -20,7 +22,7 @@ def c1(r, cn0=-0.5, cr0=1.0, beta=1.0, gamma=2.0, epsilon=3.0):
 
 
 # --- h1(r_ij): distance-based cohesion
-def h1(r, hr0=1.0, lam=2.0, sigma=3.0):
+def h1_func(r, hr0=1.0, lam=2.0, sigma=3.0):
     if r < lam:
         return hr0
     elif r < sigma:
@@ -30,7 +32,7 @@ def h1(r, hr0=1.0, lam=2.0, sigma=3.0):
 
 
 # --- c2(phi_ij): angle-based repulsion
-def c2(
+def c2_func(
     phi,
     cphi1=1.0,
     cphi2=0.5,
@@ -52,7 +54,7 @@ def c2(
 
 
 # --- h2(phi_ij): angle-based cohesion (same structure as c2)
-def h2(
+def h2_func(
     phi,
     hphi1=1.0,
     hphi2=0.5,
