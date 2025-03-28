@@ -106,7 +106,7 @@ where:
 > $v^0 = \frac{a}{\mu}$ and  $\tau = \frac{m}{\mu}$
 
 
-![fig](figs/speed_time.png)
+![fig](HTM/figs/speed_time.png)
 
 
 #### (b) Attraction / Repulsion:
@@ -128,7 +128,7 @@ $$h(x_i, \dot{x}_i, x_j) = h_1(r^{ij}) h_2(\theta^{ij})$$
 
 
 
-![fig](figs/agents_interaction.png)
+![fig](HTM/figs/agents_interaction.png)
 
 
 ---
@@ -153,7 +153,7 @@ Where:
 This force **slows down the agent as they approach the wall**, and **acts only within a threshold distance**.
 
 
-![fig](figs/wall.png)
+![fig](HTM/figs/wall.png)
 
 
 - **Attraction to Signs** $F_{eik}$:
@@ -171,7 +171,7 @@ $$F_{gi} = g_i$$
 Drives agents toward a known exit nearby.
 
 
-![fig](figs/scenario.png)
+![fig](HTM/figs/scenario.png)
 
 
 ### Summary of Region-Specific Forces
