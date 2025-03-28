@@ -3,7 +3,7 @@
 import numpy as np
 from shapely.geometry import Polygon, Point
 from typing import List, Tuple
-from .parameters import ForceParameters
+from .parameters import ForceParameters, C1Parameters, H1Parameters, C2H2Parameters, AllForceParameters
 from .utils import angle_between
 from .forces import (
     F_ai,
@@ -39,7 +39,7 @@ class Agent:
         velocity: List[float],
         mass: float = 80.0,
         damping: float = 0.5,
-        params=None,
+        params: AllForceParameters = None        
     ):
         """Create a new agent.
 
@@ -57,8 +57,8 @@ class Agent:
         self.acc = np.zeros(2)
         self.mem_signs = []
         self.last_exit_seen = 0
-        self.params = params or ForceParameters()
-
+        self.params = params or AllForceParameters()
+        
     def update(self, dt: float):
         """Update position and velocity using current acceleration."""
         self.v += dt * self.acc
@@ -80,7 +80,7 @@ class Agent:
             r = P_k - self.x  # vector from agent to sign
             dist = np.linalg.norm(r)
 
-            if dist <= self.params.sign_vision_radius:
+            if dist <= self.params.force.sign_vision_radius:
                 # Agent's view toward the sign
                 angle_agent = angle_between(self.v, r)
 
@@ -89,7 +89,7 @@ class Agent:
                 angle_sign = angle_between(o_k, sign_to_agent)
 
                 if (
-                    angle_agent <= self.params.fov_angle / 2
+                    angle_agent <= self.params.force.fov_angle / 2
                     and angle_sign <= sign_fov_angle / 2
                 ):
                     visible_now.append(P_k)
@@ -115,17 +115,21 @@ class Agent:
             exits: Exit areas as polygons.
             h_i: External influence (herding).
         """
-        f_ai = F_ai(self.v, a=self.params.a)
-        f_bi = F_bi(self.x, self.v, others, c1_func, c2_func)
-        f_ci = F_ci(self.x, self.v, others, h1_func, h2_func)
+        f_ai = F_ai(self.v, a=self.params.force.a)
+        f_bi = F_bi(
+            self.x, self.v, others, c1_func, c2_func, self.params.c1, self.params.c2h2
+        )
+        f_ci = F_ci(
+            self.x, self.v, others, h1_func, h2_func, self.params.h1, self.params.c2h2
+        )
 
         f_wi, e_w = F_wi(
             self.x,
             self.v,
             polygons,
-            d=self.params.wall_distance,
-            w0=self.params.wall_strength_into,
-            w1=self.params.wall_strength_always,
+            d=self.params.force.wall_distance,
+            w0=self.params.force.wall_strength_into,
+            w1=self.params.force.wall_strength_always,
         )
         # ------------------- signs and exits
         exit_centers = [np.array(exit.centroid.coords[0]) for exit in exits]
@@ -135,10 +139,10 @@ class Agent:
             [np.linalg.norm(self.x - c) for c in exit_centers]
         )
 
-        if min_exit_dist <= self.params.exit_domain_radius:
+        if min_exit_dist <= self.params.force.exit_domain_radius:
             # Close to exit → apply only F_gi
             f_gi = F_gi(
-                self.x, [exits[self.last_exit_seen]], strength=self.params.exit_strength
+                self.x, [exits[self.last_exit_seen]], strength=self.params.force.exit_strength
             )
             f_eik = np.zeros(2)
             f_fik = np.zeros(2)
@@ -156,17 +160,17 @@ class Agent:
                     self.x,
                     self.v,
                     signs,
-                    eta=self.params.eta_sign,
-                    vision_radius=self.params.sign_vision_radius,
-                    fov_angle=self.params.fov_angle,
+                    eta=self.params.force.eta_sign,
+                    vision_radius=self.params.force.sign_vision_radius,
+                    fov_angle=self.params.force.fov_angle,
                 )
                 f_fik = np.zeros(2)
             else:
                 f_eik = np.zeros(2)
-                f_fik = F_fik(self.x, self.mem_signs, eta=self.params.eta_mem)
+                f_fik = F_fik(self.x, self.mem_signs, eta=self.params.force.eta_mem)
         # ------------ signs and exits
 
-        f_hi = F_hi(self.x, x_panic, self.params.hi, self.params.cutoff_hi)
+        f_hi = F_hi(self.x, x_panic, self.params.force.hi, self.params.force.cutoff_hi)
 
         di = (
             min([wall.exterior.distance(Point(self.x)) for wall in polygons])
@@ -178,9 +182,9 @@ class Agent:
         f_31 = F_31(
             di,
             bwi,
-            q1=self.params.q1,
-            q2=self.params.q2,
-            d=self.params.wall_distance,
+            q1=self.params.force.q1,
+            q2=self.params.force.q2,
+            d=self.params.force.wall_distance,
         )
 
         F11 = f_ai + f_bi + f_ci

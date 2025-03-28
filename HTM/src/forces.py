@@ -5,6 +5,7 @@ from shapely.geometry import Polygon, Point
 from typing import List, Tuple
 
 from .utils import normalize, angle_between, extract_segments, random_unit
+from .parameters import C1Parameters, H1Parameters, C2H2Parameters
 
 
 # --- c1(r_ij): distance-based repulsion
@@ -81,6 +82,8 @@ def F_ci(
     others: List[Tuple[np.ndarray, np.ndarray]],
     h1_func,
     h2_func,
+    h1params: H1Parameters,
+    c2h2params: C2H2Parameters,
 ) -> np.ndarray:
     """
     Equation (5): Cohesion force based on velocity alignment.
@@ -109,7 +112,18 @@ def F_ci(
         dist = np.linalg.norm(r_ij)
         if dist > 0:
             phi_ij = angle_between(v_i, r_ij)
-            h = h1_func(dist) * h2_func(phi_ij)
+            h = h1_func(
+                dist, hr0=h1params.hr0, lam=h1params.lam, sigma=h1params.sigma
+            ) * h2_func(
+                phi_ij,
+                hphi1=c2h2params.hphi1,
+                hphi2=c2h2params.hphi2,
+                phi1=c2h2params.phi1,
+                phi2=c2h2params.phi2,
+                phi3=c2h2params.phi3,
+                phi4=c2h2params.phi4,
+            ) 
+            
             force += h * (v_j - v_i)
 
     return force / M
@@ -121,6 +135,8 @@ def F_bi(
     others: List[Tuple[np.ndarray, np.ndarray]],
     c1_func,
     c2_func,
+    c1params: C1Parameters,
+    c2h2params: C2H2Parameters,
 ) -> np.ndarray:
     """
     Equation (4): Repulsion from surrounding individuals.
@@ -128,7 +144,8 @@ def F_bi(
     F_bi = sum_j [ c(x_i, v_i, x_j) * (x_j - x_i) / ||x_j - x_i|| ]
 
     where c = c1(r_ij) * c2(phi_ij)
-
+    Two Indviduals at a certain distance attract each other and move together 
+    but if the two Indlvlduals are too close to each other, then repulsion acts between them.
     Args:
         x_i: Position of agent i
         v_i: Velocity of agent i
@@ -145,9 +162,25 @@ def F_bi(
         dist = np.linalg.norm(r_ij)
         if dist > 0:
             phi_ij = angle_between(v_i, r_ij)
-            c = c1_func(dist) * c2_func(phi_ij)
+            c = c1_func(
+                dist,
+                nu=c1params.nu,
+                cn0=c1params.cn0,
+                cr0=c1params.cr0,
+                beta=c1params.beta,
+                gamma=c1params.gamma,
+                epsilon=c1params.epsilon,
+            ) * c2_func(
+                phi_ij,
+                cphi1=c2h2params.cphi1,
+                cphi2=c2h2params.cphi2,
+                phi1=c2h2params.phi1,
+                phi2=c2h2params.phi2,
+                phi3=c2h2params.phi3,
+                phi4=c2h2params.phi4,
+            )
             force += c * (r_ij / dist)
-    return -force
+    return force
 
 
 # --- Force Components ---

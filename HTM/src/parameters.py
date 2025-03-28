@@ -58,3 +58,12 @@ class C2H2Parameters:
     cphi2: float = 0.5
     hphi1: float = 1.0
     hphi2: float = 0.5
+
+
+@dataclass
+class AllForceParameters:
+    force: ForceParameters
+    c1: C1Parameters
+    h1: H1Parameters
+    c2h2: C2H2Parameters
+
