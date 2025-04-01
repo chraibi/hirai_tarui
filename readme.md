@@ -334,6 +334,15 @@ The paper shows simulations of a passage:
 https://github.com/user-attachments/assets/a68b7b05-6154-4a4a-bbce-4f33a5575c71
 
 
+## Simulation of a room with obstacles
+
+- Two different groups with different initial distances among the group members.
+  ![Screenshot 2025-04-01 at 08 59 51](https://github.com/user-attachments/assets/5a1f2375-9c6d-4f76-b55d-9dbd8726b533)
+
+
+
+https://github.com/user-attachments/assets/2bb511e9-ce07-4ec1-9f8d-d8b740055d37
+
 
 ---
 
