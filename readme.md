@@ -1,6 +1,8 @@
 # Hirai and Tarui Crowd Simulation Model
 
 This repository implements the pedestrian dynamics model proposed by **Hirai and Tarui** (1975) for simulating the behavior of crowds.
+![grafik](https://github.com/user-attachments/assets/d70db230-679d-40f8-9b8d-a1ea2d3c9a67)
+
 
 ---
 
