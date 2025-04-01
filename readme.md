@@ -1,8 +1,28 @@
 # Hirai and Tarui Crowd Simulation Model
 
-This repository implements the pedestrian dynamics model proposed by **Hirai and Tarui** (1975) for simulating the behavior of crowds.
+This is a force-based model from 1975 simulating crowd dynamics using social and environmental forces.
+
+> K. Hirai and K. Tarui, "A Simulation of the Behavior of a Crowd in Panic", Kobe University, 1975.
+
+
 ![grafik](https://github.com/user-attachments/assets/d70db230-679d-40f8-9b8d-a1ea2d3c9a67)
 
+
+## Running simulations
+
+Interactive examples and experiments are provided in the notebooks. These include:
+
+- Basic force tests (e.g., wall force, pairwise interaction)
+- Overtaking scenarios
+- Original scenario from the paper
+- Room evacuation with obstacles
+
+To run the notebooks, install the dependencies and open with Jupyter:
+
+```
+pip install -r requirements.txt
+jupyter notebook
+```
 
 ---
 
@@ -122,7 +142,8 @@ $$c(x_i, \dot{x}_i, x_j) = c_1(r^{ij}) c_2(\theta^{ij})$$
 
 #### (c) Velocity Matching (Alignment):
 
-$$F_{ci} = - \frac{1}{M} \sum_j h(x_i, \dot{x}_i, x_j) \frac{x_j - x_i}{r^{ij}}$$
+$$F_{ci} = \frac{1}{M} \sum_j h(x_i, \dot{x}_i, x_j)(\dot{x}_j - \dot{x}_i)$$
+
 
 Encourages alignment of motion in local groups.
 
@@ -344,11 +365,4 @@ https://github.com/user-attachments/assets/a68b7b05-6154-4a4a-bbce-4f33a5575c71
 
 
 https://github.com/user-attachments/assets/2bb511e9-ce07-4ec1-9f8d-d8b740055d37
-
-
----
-
-## References
-- K. Hirai and K. Tarui, "A Simulation of the Behavior of a Crowd in Panic", Kobe University, 1975.
----
 
